@@ -11,6 +11,7 @@ to the right, breathe out as the marker comes back to the left hand side.
 Repeat. A five minute session will have a long lasting calming effect.
 '''
 
+from itertools import chain
 import math
 import re
 import shutil
@@ -73,13 +74,13 @@ def restore_term(sig, frame):
 
 # cursor_col = 0.5 * cols_nr * (1 - cos(π * (t - t0) / Δt))
 # t = t0 + Δt * acos(1 - 2 * cursor_col / cols_nr) / π
-def time_at_pos(cols, dur):
+def time_at_pos(cols, dur, offset=0.0):
     '''
     Compute the time delay to reach column i for a sine wave of total duration dur
     to span a terminal width of cols columns.
     '''
     def t2p(i):
-        return dur * math.acos(1.0 - 2.0 * i / cols) / math.pi
+        return offset + dur * math.acos(1.0 - 2.0 * i / cols) / math.pi
     return t2p
 
 
@@ -94,15 +95,12 @@ def breathe_cycle(in_duration, out_duration):
     cols, _ = shutil.get_terminal_size()
     _, y = get_cursor_position()
 
-    p_in = range(1, cols + 1)
-    d_in = list(map(time_at_pos(cols, in_duration), p_in))
-    d_out = list(map(time_at_pos(cols, out_duration), p_in))
-    d_out = list(map(lambda _0: _0 + in_duration, d_out))
-    p = list(p_in) + list(reversed(p_in))
-    d = d_in + d_out
+    rg = range(1, cols + 1)
+    d_in = map(time_at_pos(cols, in_duration), rg)
+    d_out = map(time_at_pos(cols, out_duration, in_duration), rg)
 
     d0 = time.monotonic_ns()
-    for x, t in zip(p, d):
+    for x, t in zip(chain(rg, reversed(rg)), chain(d_in, d_out)):
         move_to(x, y)
         print_code("*")
         dt = (d0 + t * 1.0e9 - time.monotonic_ns()) / 1.0e9
