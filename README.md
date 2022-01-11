@@ -9,13 +9,13 @@ Start `breathe.py` and follow along.
 
 Breathe in calmly and evenly as the marker sweeps the terminal from the left
 to the right, breathe out as the marker comes back to the left hand side.
-Repeat. A five minute session will have a long lasting calming effect.
+Repeat. A five minute session will have a long relaxing calming effect.
 
 ## Usage
 
 `breathe.py` provides 2 parameters to tweak inhalation and exhalation durations.
 Both default to 5.5 seconds, but some may prefer slightly shorter or longer
-durations for each phase.
+durations for each phase. Popular timings are 5-5, 5-6 or even 6-6.
 
 Halt the program with `Ctrl+C`.
 
