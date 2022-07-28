@@ -93,15 +93,21 @@ def breathe_cycle(in_duration, out_duration):
     _, y = get_cursor_position()
 
     rg = range(1, cols + 1)
+    # positions for the first half of a cycle
     d_in = [time_at_pos(cols, in_duration, ind, 0) for ind in rg]
+    # positions for the second half of a cycle
     d_out = [time_at_pos(cols, out_duration, ind, out_duration) for ind in rg]
 
+    # positions and times for a full cycle
+    cycle_x_positions = chain(rg, reversed(rg))
+    cycle_times = chain(d_in, d_out)
+
     d0 = time.monotonic_ns()
-    for x, t in zip(chain(rg, reversed(rg)), chain(d_in, d_out)):
+    for x, t in zip(cycle_x_positions, cycle_times):
         move_to(x, y)
         print_code("*")
         dt = (d0 + t * 1.0e9 - time.monotonic_ns()) / 1.0e9
-        time.sleep(dt)
+        time.sleep(abs(dt))
         move_to(x, y)
         print_code(" ")
 
@@ -117,14 +123,17 @@ def main():
     )
     parser.add_argument('-i', type=float, default=5.5, help='breathe in duration in seconds', dest='in_duration')
     parser.add_argument('-o', type=float, default=5.5, help='breathe out duration in seconds', dest='out_duration')
+    parser.add_argument('-t', type=float, default=2.0, help='Session duration in minutes', dest='session_duration')
     args = parser.parse_args()
 
     show_cursor(False)
     signal.signal(signal.SIGINT, restore_term)
-    while True:
+    t0 = time.time()
+    while (time.time() - t0) <= args.session_duration * 60:
         breathe_cycle(args.in_duration, args.out_duration)
+    print("Session finished !")
+    show_cursor(True)
 
 
 if __name__ == '__main__':
     main()
-
