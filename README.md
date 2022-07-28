@@ -17,10 +17,12 @@ Repeat. A five minute session will have a long relaxing calming effect.
 Both default to 5.5 seconds, but some may prefer slightly shorter or longer
 durations for each phase. Popular timings are 5-5, 5-6 or even 6-6.
 
+Another parameter limits the session time.
+
 Halt the program with `Ctrl+C`.
 
 ```
-usage: breathe.py [-h] [-i IN_DURATION] [-o OUT_DURATION]
+usage: breathe.py [-h] [-i IN_DURATION] [-o OUT_DURATION] [-t SESSION_DURATION]
 
 Cardiac Coherence breathing exercice from the confort of your Unix terminal.
 
@@ -28,5 +30,5 @@ options:
   -h, --help       show this help message and exit
   -i IN_DURATION   breathe in duration in seconds
   -o OUT_DURATION  breathe out duration in seconds
+  -t SESSION_DURATION  session duration in minutes
 ```
-
