@@ -74,15 +74,12 @@ def restore_term(sig, frame):
 
 # cursor_col = 0.5 * cols_nr * (1 - cos(π * (t - t0) / Δt))
 # t = t0 + Δt * acos(1 - 2 * cursor_col / cols_nr) / π
-def time_at_pos(cols, dur, offset=0.0):
+def time_at_pos(cols, dur, i, offset=0.0):
     '''
     Compute the time delay to reach column i for a sine wave of total duration dur
     to span a terminal width of cols columns.
     '''
-    def t2p(i):
-        return offset + dur * math.acos(1.0 - 2.0 * i / cols) / math.pi
-    return t2p
-
+    return offset + dur * math.acos(1.0 - 2.0 * i / cols) / math.pi
 
 def breathe_cycle(in_duration, out_duration):
     '''
@@ -96,15 +93,21 @@ def breathe_cycle(in_duration, out_duration):
     _, y = get_cursor_position()
 
     rg = range(1, cols + 1)
-    d_in = map(time_at_pos(cols, in_duration), rg)
-    d_out = map(time_at_pos(cols, out_duration, in_duration), rg)
+    # positions for the first half of a cycle
+    d_in = [time_at_pos(cols, in_duration, ind, 0) for ind in rg]
+    # positions for the second half of a cycle
+    d_out = [time_at_pos(cols, out_duration, ind, in_duration) for ind in rg]
+
+    # positions and times for a full cycle
+    cycle_x_positions = chain(rg, reversed(rg))
+    cycle_times = chain(d_in, d_out)
 
     d0 = time.monotonic_ns()
-    for x, t in zip(chain(rg, reversed(rg)), chain(d_in, d_out)):
+    for x, t in zip(cycle_x_positions, cycle_times):
         move_to(x, y)
         print_code("*")
         dt = (d0 + t * 1.0e9 - time.monotonic_ns()) / 1.0e9
-        time.sleep(dt)
+        time.sleep(abs(dt))
         move_to(x, y)
         print_code(" ")
 
@@ -120,14 +123,17 @@ def main():
     )
     parser.add_argument('-i', type=float, default=5.5, help='breathe in duration in seconds', dest='in_duration')
     parser.add_argument('-o', type=float, default=5.5, help='breathe out duration in seconds', dest='out_duration')
+    parser.add_argument('-t', type=float, default=2.0, help='Session duration in minutes', dest='session_duration')
     args = parser.parse_args()
 
     show_cursor(False)
     signal.signal(signal.SIGINT, restore_term)
-    while True:
+    t0 = time.time()
+    while (time.time() - t0) <= args.session_duration * 60:
         breathe_cycle(args.in_duration, args.out_duration)
+    print("Session finished !")
+    show_cursor(True)
 
 
 if __name__ == '__main__':
     main()
-
