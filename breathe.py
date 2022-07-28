@@ -96,7 +96,7 @@ def breathe_cycle(in_duration, out_duration):
     # positions for the first half of a cycle
     d_in = [time_at_pos(cols, in_duration, ind, 0) for ind in rg]
     # positions for the second half of a cycle
-    d_out = [time_at_pos(cols, out_duration, ind, out_duration) for ind in rg]
+    d_out = [time_at_pos(cols, out_duration, ind, in_duration) for ind in rg]
 
     # positions and times for a full cycle
     cycle_x_positions = chain(rg, reversed(rg))
